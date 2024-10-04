@@ -4,8 +4,6 @@ const { generateToken } = require('../utils/jwt');
 
 exports.register = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
-  console.log(req.body);
-
   if (password !== confirmPassword) {
     return res.status(400).json({ message: 'Passwords do not match' });
   }
@@ -35,22 +33,8 @@ exports.register = async (req, res) => {
   );
 };
 
-exports.verifyEmail = async (req, res) => {
-  const { email, verificationCode } = req.body;
-
-  const user = await User.findOne({ email, verificationCode });
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid verification code' });
-  }
-
-  user.isVerified = true;
-  user.verificationCode = undefined;
-  await user.save();
-
-  res.status(200).json({ message: 'Email verified successfully' });
-};
-
 exports.login = async (req, res) => {
+  console.log(req.userId)
   const { email, password } = req.body;
   console.log(req.body);
 
@@ -58,15 +42,14 @@ exports.login = async (req, res) => {
   if (!user) {
     return res.status(400).json({ message: 'Invalid credentials or email not verified' });
   }
-  console.log(user)
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
-  console.log(isPasswordValid)
 
   const token = generateToken(user._id);
+  console.log(token);
 
   res.status(200).json(
     {

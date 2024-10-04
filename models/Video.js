@@ -1,33 +1,32 @@
 const mongoose = require('mongoose');
 
-const vidoeSchema = new mongoose.Schema({
-  name: {
+const videoSchema = new mongoose.Schema({
+  title: {
     type: String,
-    required: true
+    // required: true
   },
   videoUrl:{
     type: String,
-    required: true
+    // required: true
   },
   mainCategory: {
     type: String,
-    required: true,
+    // required: true,
   },
   subCategory: {
     type: String,
-    required: true
+    // required: true
   },
   description: {
-    type: String,
-    default: 'visitor'//admin || poster
+    // type: String,
   },
-  poster: {
+  posterId: {
     type: String,
-    required: true
+    // required: true
   },
   duration: {
     type: String,
-    required: true
+    // required: true
   },
   views: {
     type: Number,
@@ -43,4 +42,4 @@ const vidoeSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model('Vodeo', vidoeSchema);
+module.exports = mongoose.model('Video', videoSchema);

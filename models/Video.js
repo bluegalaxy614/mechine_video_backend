@@ -5,6 +5,10 @@ const vidoeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  videoUrl:{
+    type: String,
+    required: true
+  },
   mainCategory: {
     type: String,
     required: true,

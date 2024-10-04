@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
-const { sendEmail, sendVerificationEmail } = require('../utils/sendEmail');
 
 exports.register = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
@@ -17,14 +16,11 @@ exports.register = async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  // const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
   const user = new User({ name, email, password: hashedPassword });
   await user.save();
 
   const token = generateToken(user._id);
-
-  // sendEmail(email, verificationCode);
 
   res.status(201).json(
     {

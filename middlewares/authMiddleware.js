@@ -3,6 +3,8 @@ const { JWT_SECRET } = require('../config/auth');
 
 // Authorization Middleware
 const authMiddleware = (req, res, next) => {
+  console.log("authMiddleware")
+  console.log(req.body)
   const authHeader = req.headers['authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

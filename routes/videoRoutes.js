@@ -1,10 +1,18 @@
 const express = require('express');
-const router = express.Router();
-const upload = require('../middleware/multer');
-const { uploadVideo } = require('../controllers/VideoController');
-const authMiddleware = require('../middleware/authMiddleware');
+const upload = require('../middlewares/multer');
+const videoController = require('../controllers/videoController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-// POST route for uploading video
-router.post('/upload', authMiddleware, upload.single('video'), uploadVideo);
+const router = express.Router();
+
+// POST route for video and screenshot uploads
+router.post('/upload',
+    authMiddleware,
+    upload.fields([
+        { name: 'video', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 }
+    ]),
+    videoController.uploadVideoAndScreenshot
+);
 
 module.exports = router;

@@ -4,6 +4,7 @@ const cors = require('cors')
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const videoRoutes = require('./routes/videoRoutes.js');
+const topPageController = require('./controllers/topPageController');
 const app = express();
 
 // MongoDB connection
@@ -13,7 +14,12 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from 'public' directory
+app.use('/thumbnails', express.static('public/thumbnails'));
+
 // Routes
+
+
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
 

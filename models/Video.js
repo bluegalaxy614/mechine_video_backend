@@ -1,45 +1,24 @@
 const mongoose = require('mongoose');
 
+// Define the video schema
 const videoSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    // required: true
-  },
-  videoUrl:{
-    type: String,
-    // required: true
-  },
-  mainCategory: {
-    type: String,
-    // required: true,
-  },
-  subCategory: {
-    type: String,
-    // required: true
-  },
-  description: {
-    // type: String,
-  },
-  posterId: {
-    type: String,
-    // required: true
-  },
-  duration: {
-    type: String,
-    // required: true
-  },
-  views: {
-    type: Number,
-    default: 0
-  },
-  likes: {
-    type: Number,
-    default: 0
-  },
-  status:{
-    type: String,
-    default: 'penidng' //pending, approved, rejected
-  },
-}, { timestamps: true });
+  title: { type: String, required: true },
+  description: { type: String },
+  videoDuration: { type: String },
+  youtubeLink: { type: String },
+  videoCode: { type: String },
+  machineName: { type: String },
+  format: { type: String },
+  manufacturer: { type: String },
+  selectedCategory: { type: String },
+  selectedSubCategory: { type: String },
+  thumbnailsUrl: { type: String, required: true },  // URL for the locally stored image
+  videoUrl: { type: String, required: true },  // URL for the S3 video
+  posterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },  // User ID of uploader
+  uploadDate: { type: Date, default: Date.now },
+});
 
-module.exports = mongoose.model('Video', videoSchema);
+// Create the Video model
+const Video = mongoose.model('Video', videoSchema);
+
+module.exports = Video;

@@ -19,7 +19,6 @@ app.use('/thumbnails', express.static('public/thumbnails'));
 
 // Routes
 
-
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
 

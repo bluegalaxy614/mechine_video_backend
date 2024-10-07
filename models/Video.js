@@ -5,7 +5,6 @@ const videoSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   videoDuration: { type: String },
-  youtubeLink: { type: String },
   videoCode: { type: String },
   machineName: { type: String },
   format: { type: String },

@@ -1,6 +1,6 @@
 const express = require('express');
 const upload = require('../middlewares/multer');
-const videoController = require('../controllers/videoController');
+const {uploadVideoAndScreenshot, getVideos} = require('../controllers/VideoController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -12,7 +12,9 @@ router.post('/upload',
         { name: 'video', maxCount: 1 },
         { name: 'thumbnail', maxCount: 1 }
     ]),
-    videoController.uploadVideoAndScreenshot
+    uploadVideoAndScreenshot
 );
+
+router.post('/getVideos', getVideos);
 
 module.exports = router;

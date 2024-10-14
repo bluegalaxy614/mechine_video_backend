@@ -6,7 +6,9 @@ const {
     getAllVideos,
     updateVideo,
     getAllMessage,
-    sendMessages
+    sendMessages,
+    deleteUserById,
+    deleteVideoById
 } = require('../controllers/adminControllers');
 const router = express.Router();
 
@@ -17,5 +19,7 @@ router.post('/getAllVideos', getAllVideos);
 router.post('/updateVideo', updateVideo);
 router.post('/getAllMessage', getAllMessage);
 router.post('/sendMessages', sendMessages);
+router.post('/deleteUserById', deleteUserById);
+router.post('/deleteVideoById', deleteVideoById);
 
 module.exports = router;

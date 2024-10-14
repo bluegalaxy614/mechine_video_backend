@@ -28,6 +28,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/poster', posterRoutes);
 
 app.use('/api/admin', adminRoutes);
+app.use('/api/deleteUserById', adminRoutes);
+app.use('/api/deleteVideoById', adminRoutes);
 
 app.use('/api/payment', paymentRroutes);
 

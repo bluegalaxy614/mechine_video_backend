@@ -1,6 +1,7 @@
 const News = require('../models/News')
 const Video = require('../models/Video')
 const Chat = require('../models/Chat')
+const User = require('../models/User')
 const createNews = async (req, res) => {
     console.log("create News", req)
     const { title, content } = req.body
@@ -102,14 +103,40 @@ const sendMessages = async (req, res) => {
     console.log(req.body)
     const { userId, from, content } = req.body;
     try {
-        const message = await Chat.find({ userId: userId })
-        message.push({
+        const res = await Chat.find({ userId: userId })
+        res.message.push({
             from: from,
             content: content
         })
-        await message.save()
+        await res.save()
         res.json({
-            message
+            res
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'An error occurred during the upload process.' });
+    }
+}
+const deleteUserById = async (req, res) => {
+    console.log(req.body)
+    const { userId } = req.body;
+    try {
+        const user = await User.findOneAndDelete({ _id: userId })
+        res.json({
+            message: "Successfully Deleted"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'An error occurred during the upload process.' });
+    }
+}
+const deleteVideoById = async (req, res) => {
+    console.log(req.body)
+    const { videoId } = req.body;
+    try {
+        const user = await Video.findOneAndDelete({ _id: videoId })
+        res.json({
+            message: "Successfully Deleted"
         })
     } catch (error) {
         console.log(error)
@@ -124,5 +151,7 @@ module.exports = {
     getAllVideos,
     updateVideo,
     getAllMessage,
-    sendMessages
+    sendMessages,
+    deleteUserById,
+    deleteVideoById,
 }

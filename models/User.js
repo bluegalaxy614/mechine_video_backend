@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: '無料会員'//admin || poster
+    default: '無料会員'
   },
   avatar: {
     type: String

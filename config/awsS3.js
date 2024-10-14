@@ -13,7 +13,8 @@ const s3Client = new S3Client({
     requestHandler: {
         connectionTimeout: 300000,
         sockedTimeout: 300000
-    }
+    },
+    endpoint: `https://${process.env.AWS_BUCKET_NAME}.s3-accelerate.amazonaws.com`,
 });
 
 // List buckets to verify connection

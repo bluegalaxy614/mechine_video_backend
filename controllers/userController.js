@@ -1,3 +1,4 @@
+const Chat = require('../models/Chat');
 const User = require('../models/User');
 
 const getUsers = async (req, res) => {
@@ -12,6 +13,24 @@ const getUsers = async (req, res) => {
     }
 };
 
+const sendAskMessage = async (req, res) => {
+    console.log("sendAskMessage")
+    const userId = req.userId;
+    const { message } = req.body;
+    try {
+        const res = await Chat.find({userId : userId});
+        res.message.push({
+            from:userId,
+            content: message
+        })
+        await res.save();
+        res.json({message: "Successfully sent"});
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 module.exports = {
-    getUsers
+    getUsers,
+    sendAskMessage
 };

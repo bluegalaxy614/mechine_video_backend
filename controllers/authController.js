@@ -22,22 +22,20 @@ exports.register = async (req, res) => {
 
   res.status(201).json(
     {
-      message: 'User registered. Check email for verification.',
-      token: token,
+      message: 'New account is created!',
       user: {
+        token: token,
         name: name,
         email: email,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role:user.role,
       },
     }
   );
 };
 
 exports.login = async (req, res) => {
-  console.log(req.userId)
   const { email, password } = req.body;
-  console.log(req.body);
-
   const user = await User.findOne({ email });
   if (!user) {
     return res.status(400).json({ message: 'Invalid credentials or email not verified' });
@@ -54,8 +52,8 @@ exports.login = async (req, res) => {
   res.status(200).json(
     {
       message: 'User registered.',
-      token: token,
       user: {
+        token: token,
         name: user.name,
         email: user.email,
         avatar: user.avatar,

@@ -1,6 +1,6 @@
 const express = require('express');
 const upload = require('../middlewares/multer');
-const {uploadVideoAndScreenshot, getVideos} = require('../controllers/VideoController');
+const {uploadVideoAndScreenshot, getVideos, searchVideos, getPosterVideos} = require('../controllers/VideoController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -15,6 +15,9 @@ router.post('/upload',
     uploadVideoAndScreenshot
 );
 
+// router.post('/getVideos',authMiddleware, getVideos);
 router.post('/getVideos', getVideos);
+router.post('/getVideos',authMiddleware, getPosterVideos);
+router.post('/search', authMiddleware, searchVideos);
 
 module.exports = router;

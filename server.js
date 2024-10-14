@@ -4,7 +4,11 @@ const cors = require('cors')
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const videoRoutes = require('./routes/videoRoutes.js');
-const topPageController = require('./controllers/topPageController');
+const userRoutes = require('./routes/userRoutes.js');
+const posterRoutes = require('./routes/posterRoutes.js');
+const adminRoutes = require('./routes/adminRoutes.js');
+const paymentRroutes = require('./routes/paymentroutes.js');
+
 const app = express();
 
 // MongoDB connection
@@ -18,9 +22,14 @@ app.use(express.json());
 app.use('/thumbnails', express.static('public/thumbnails'));
 
 // Routes
-
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/poster', posterRoutes);
+
+app.use('/api/admin', adminRoutes);
+
+app.use('/api/payment', paymentRroutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

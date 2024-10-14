@@ -16,10 +16,16 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'visitor'//admin || poster
+    default: '無料会員'//admin || poster
   },
   avatar: {
     type: String
+  },
+  posterCounts: {
+    type: Number
+  },
+  viewCounts: {
+    type: Number
   },
   expired: {
     start: {
@@ -29,6 +35,20 @@ const userSchema = new mongoose.Schema({
       type: Date
     }
   },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Video',
+    default: null
+  }],
+  expired: {
+    start: {
+      type: Date
+    },
+    end: {
+      type: Date
+    }
+  }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

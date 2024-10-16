@@ -20,8 +20,8 @@ const stripePayments = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.CLIENT_URL}/`, // Your frontend success URL
-            cancel_url: `${process.env.CLIENT_URL}/`, // Your frontend cancel URL
+            success_url: `${process.env.CLIENT_URL}/payment/success`, // Your frontend success URL
+            cancel_url: `${process.env.CLIENT_URL}/payment/cancel`, // Your frontend cancel URL
         });
 
         res.json({ id: session.id });

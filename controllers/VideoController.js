@@ -84,7 +84,6 @@ const uploadVideoAndScreenshot = async (req, res) => {
 const getVideos = async (req, res) => {
     console.log("getVideos controller")
     const { page, perPage, sort } = req.body;
-    console.log(req.body)
     try {
         const skip = (page - 1) * perPage;
         const videos = await Video.find().sort({ [sort]: -1 }).skip(skip).limit(perPage);
@@ -99,13 +98,14 @@ const getVideos = async (req, res) => {
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
 }
+
 const getPosterVideos = async (req, res) => {
     console.log("getPosterVideos controller")
     const { page, perPage, sort } = req.body;
     const userId = req.userId;
     try {
         const skip = (page - 1) * perPage;
-        const videos = await Video.find({posterId: userId}).sort({ [sort]: -1 }).skip(skip).limit(perPage);
+        const videos = await Video.find({ posterId: userId }).sort({ [sort]: -1 }).skip(skip).limit(perPage);
         const totalVideos = videos.countDocuments();
         const unPaidVideos = await Video.find({ posterId: userId, status: "未払い" }).countDocuments();
         const paidVideos = await Video.find({ posterId: userId, status: "支払い" }).countDocuments();
@@ -118,6 +118,18 @@ const getPosterVideos = async (req, res) => {
             paidVideos,
             totalPaidMounts
         });
+    } catch {
+        res.status(500).json({ message: 'An error occurred during the upload process.' });
+    }
+}
+const isStaredVideo = async (req, res) => {
+    console.log("getPosterVideos controller")
+    const { videoId } = req.body;
+    const userId = req.userId;
+    try {
+        const user = await User.findById(userId);
+        user.likes.push(videoId);
+        await user.save();
     } catch {
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
@@ -164,4 +176,10 @@ const searchVideos = async (req, res) => {
     }
 }
 
-module.exports = { uploadVideoAndScreenshot, getVideos, searchVideos, getPosterVideos };
+module.exports = {
+    uploadVideoAndScreenshot,
+    getVideos,
+    searchVideos,
+    getPosterVideos,
+    isStaredVideo
+};

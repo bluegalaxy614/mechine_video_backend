@@ -89,10 +89,12 @@ const updateVideo = async (req, res) => {
 }
 
 const getAllMessage = async (req, res) => {
+    console.log("get All messages")
     try {
-        const messages = await Chat.find()
+        const chats = await Chat.find()
+        console.log(chats)
         res.json({
-            messages
+            messages:chats
         })
     } catch (error) {
         console.log(error)
@@ -101,16 +103,17 @@ const getAllMessage = async (req, res) => {
 }
 const sendMessages = async (req, res) => {
     console.log(req.body)
-    const { userId, from, content } = req.body;
+    const { userId, content } = req.body;
     try {
-        const res = await Chat.find({ userId: userId })
-        res.message.push({
-            from: from,
+        const chat = await Chat.findOne({ userId: userId })
+        console.log(chat)
+        chat.messages.push({
+            from: "admin",
             content: content
         })
-        await res.save()
+        await chat.save()
         res.json({
-            res
+            message:"Successfully Sent!"
         })
     } catch (error) {
         console.log(error)

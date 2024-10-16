@@ -7,7 +7,7 @@ const getUsers = async (req, res) => {
     try {
         const users = await User.find().sort({ [sort]: -1 }).skip(skip).limit(perPage);
         const totalPages = Math.ceil(await User.countDocuments() / perPage);
-        res.json({users : users,totalPages : totalPages});
+        res.json({ users: users, totalPages: totalPages });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -16,15 +16,52 @@ const getUsers = async (req, res) => {
 const sendAskMessage = async (req, res) => {
     console.log("sendAskMessage")
     const userId = req.userId;
-    const { message } = req.body;
+    const { content } = req.body;
+    console.log(content)
     try {
-        const res = await Chat.find({userId : userId});
-        res.message.push({
-            from:userId,
-            content: message
-        })
-        await res.save();
-        res.json({message: "Successfully sent"});
+        const user = await User.findOne({ _id: userId });
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        let chat = await Chat.findOne({ userId: userId });
+        console.log(chat)
+        if (!chat) {
+            // Create a new chat if it doesn't exist
+            chat = new Chat({
+                userId: userId,
+                userName: user.name,
+                userAvatar: user.avatar,
+                messages: [{
+                    from: userId,
+                    content: content,
+                }],
+                unread: 1,  // Initial unread count
+            });
+        } else {
+            // Update existing chat
+            chat.messages.push({
+                from: userId,
+                content: content
+            });
+            chat.unread += 1;  // Increment unread count
+        }
+
+        // Save the chat (either a new one or the updated one)
+        await chat.save();
+
+        res.json({ message: "Successfully sent" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const getUserMessage = async (req, res) => {
+    console.log("getUserMessage")
+    const userId = req.userId;
+    try {
+        let chats = await Chat.findOne({ userId: userId });
+        res.json({ chats: chats });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -32,5 +69,6 @@ const sendAskMessage = async (req, res) => {
 
 module.exports = {
     getUsers,
-    sendAskMessage
+    sendAskMessage,
+    getUserMessage,
 };

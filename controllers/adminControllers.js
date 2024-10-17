@@ -3,23 +3,20 @@ const Video = require('../models/Video')
 const Chat = require('../models/Chat')
 const User = require('../models/User')
 const createNews = async (req, res) => {
-    console.log("create News", req)
     const { title, content } = req.body
-    console.log(req.body)
     try {
         const news = new News({
             title: title,
             content: content
         })
         await news.save()
-        res.json({ message: 'News created successfully' })
+        res.json({ message: 'ニュースが正常に作成されました。' })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
 }
 
 const getNews = async (req, res) => {
-    console.log("get News")
     const perPage = 10
     const page = req.body.currenPage
     const skip = (page - 1) * perPage
@@ -36,9 +33,7 @@ const getNews = async (req, res) => {
     }
 }
 const getAllVideos = async (req, res) => {
-    console.log("getVideos controller")
     const { page, perPage, sort } = req.body;
-    console.log(req.body)
     try {
         const skip = (page - 1) * perPage;
         const videos = await Video.find().sort({ [sort]: -1 }).skip(skip).limit(perPage);
@@ -54,23 +49,17 @@ const getAllVideos = async (req, res) => {
     }
 }
 const getVideoWithUserId = async (req, res) => {
-    console.log("get Video")
-    console.log(req.body)
     const { videoId } = req.body;
     try {
-        console.log(videoId)
         const video = await Video.findById(videoId)
-        console.log(video)
         res.json({
             video
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
 }
 const updateVideo = async (req, res) => {
-    console.log(req.body)
     const { id, selectedCategory, selectedSubCategory, status } = req.body;
     try {
         const video = await Video.findById(id)
@@ -78,74 +67,75 @@ const updateVideo = async (req, res) => {
         video.selectedSubCategory = selectedSubCategory
         video.status = status
         await video.save()
-        console.log(video)
         res.json({
             video
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
 }
 
 const getAllMessage = async (req, res) => {
-    console.log("get All messages")
     try {
         const chats = await Chat.find()
-        console.log(chats)
         res.json({
-            messages:chats
+            messages: chats
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
 }
 const sendMessages = async (req, res) => {
-    console.log(req.body)
     const { userId, content } = req.body;
     try {
         const chat = await Chat.findOne({ userId: userId })
-        console.log(chat)
         chat.messages.push({
             from: "admin",
             content: content
         })
         await chat.save()
         res.json({
-            message:"Successfully Sent!"
+            message: "送信が完了しました！"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: 'An error occurred during the upload process.' });
     }
 }
-const deleteUserById = async (req, res) => {
-    console.log(req.body)
+
+const viewMessages = async (req, res) => {
     const { userId } = req.body;
     try {
-        const user = await User.findOneAndDelete({ _id: userId })
+        const chat = await Chat.findOne({ userId: userId });
+        chat.unread = 0;
+        await chat.save();
         res.json({
-            message: "Successfully Deleted"
+            message: "メッセージを読みました。"
         })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-}
-const deleteVideoById = async (req, res) => {
-    console.log(req.body)
-    const { videoId } = req.body;
+};
+
+const deleteAllChats = async (req, res) => {
+    const { userId } = req.body;
+
     try {
-        const user = await Video.findOneAndDelete({ _id: videoId })
+        const result = await Chat.deleteOne({ userId: userId }); // Perform the deletion
+
+        if (result.deletedCount === 0) {
+            // No chat was found for this userId
+            return res.status(404).json({ message: "No chat found for this user." });
+        }
+
         res.json({
-            message: "Successfully Deleted"
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+            message: "すべてのメッセージを削除しました。"
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-}
+};
+
 
 module.exports = {
     createNews,
@@ -155,6 +145,6 @@ module.exports = {
     updateVideo,
     getAllMessage,
     sendMessages,
-    deleteUserById,
-    deleteVideoById,
+    viewMessages,
+    deleteAllChats
 }

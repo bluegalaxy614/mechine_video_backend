@@ -23,7 +23,7 @@ const updateProfile = async (req, res) => {
         const user = await User.findById(userId);
 
         if(!user){
-            return res.status(404).json({message: 'User not found'});
+            return res.status(404).json({message: 'ユーザーが見つかりません。'});
         }
 
         const avatar = req.files['avatar'][0];
@@ -39,7 +39,7 @@ const updateProfile = async (req, res) => {
         await user.save();
         res.status(200).json(
             {
-                message: 'Profile updated successfully',
+                message: 'プロフィールが正常に更新されました。',
                 user: {
                     name: user.name,
                     email: user.email,

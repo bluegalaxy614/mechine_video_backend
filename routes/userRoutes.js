@@ -4,11 +4,13 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
 const posterControllers = require('../controllers/posterController');
 const upload = require('../middlewares/multer');
-const { uploadVideoAndScreenshot,
+const {
+    uploadVideoAndScreenshot,
     getVideos,
     searchVideos,
     getPosterVideos,
     isStaredVideo,
+    searchVideoInString
 } = require('../controllers/VideoController');
 
 router.post('/upload',
@@ -33,5 +35,7 @@ router.post('/getUsers', userController.getUsers);
 router.post('/sendAskMessage', authMiddleware, userController.sendAskMessage);
 router.post('/isStaredVideo', authMiddleware, isStaredVideo);
 router.post('/getUserMessage', authMiddleware, userController.getUserMessage);
+router.post('/giveStartToVideo', authMiddleware, userController.giveStartToVideo);
+router.post('/searchVideoInString', authMiddleware, searchVideoInString);
 
 module.exports = router;

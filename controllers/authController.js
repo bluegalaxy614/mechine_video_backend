@@ -5,12 +5,12 @@ const { generateToken } = require('../utils/jwt');
 exports.register = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
   if (password !== confirmPassword) {
-    return res.status(400).json({ message: 'Passwords do not match' });
+    return res.status(400).json({ message: 'パスワードが一致しません。' });
   }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: 'Email already exists' });
+    return res.status(400).json({ message: 'メールアドレスはすでに存在します。' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
 
   res.status(201).json(
     {
-      message: 'New account is created!',
+      message: '正常にサインアップしました。',
       user: {
         token: token,
         name: name,
@@ -38,12 +38,12 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(400).json({ message: 'Invalid credentials or email not verified' });
+    return res.status(400).json({ message: '認証情報が無効か、メールが確認されていません。' });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    return res.status(400).json({ message: 'Invalid credentials' });
+    return res.status(400).json({ message: '無効な資格情報。' });
   }
 
   const token = generateToken(user._id);
@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
 
   res.status(200).json(
     {
-      message: 'User registered.',
+      message: 'サインインに成功しました。',
       user: {
         token: token,
         name: user.name,
@@ -69,7 +69,7 @@ exports.forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'User not found' });
+      return res.status(400).json({ message: 'ユーザーが見つかりません。' });
     }
     // const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     // user.verificationCode = verificationCode;

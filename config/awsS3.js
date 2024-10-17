@@ -21,7 +21,7 @@ const s3Client = new S3Client({
 const checkConnection = async () => {
     try {
         const data = await s3Client.send(new ListBucketsCommand({}));
-        console.log('AWS S3 connected successfully!');
+        console.log('AWS S3 connected successfully!', data);
     } catch (error) {
         console.log('AWS S3 not connected:', error);
     }

@@ -7,9 +7,10 @@ const {
     updateVideo,
     getAllMessage,
     sendMessages,
-    deleteUserById,
-    deleteVideoById
+    viewMessages,
+    deleteAllChats
 } = require('../controllers/adminControllers');
+const { deleteUserById, deleteVideoById } = require('../controllers/VideoController');
 const router = express.Router();
 
 router.post('/createNews', createNews);
@@ -21,5 +22,7 @@ router.post('/getAllMessage', getAllMessage);
 router.post('/sendMessages', sendMessages);
 router.post('/deleteUserById', deleteUserById);
 router.post('/deleteVideoById', deleteVideoById);
+router.post('/viewMessages', viewMessages);
+router.post('/deleteAllChats', deleteAllChats);
 
 module.exports = router;

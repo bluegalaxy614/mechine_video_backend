@@ -22,18 +22,12 @@ const userSchema = new mongoose.Schema({
     type: String
   },
   posterCounts: {
-    type: Number
+    type: Number,
+    default: 0
   },
   viewCounts: {
-    type: Number
-  },
-  expired: {
-    start: {
-      type: Date
-    },
-    end: {
-      type: Date
-    }
+    type: Number,
+    default: 0
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -48,7 +42,7 @@ const userSchema = new mongoose.Schema({
       type: Date
     }
   },
-
+  uploads:{type:Number, default:0}
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

@@ -21,7 +21,7 @@ const sendAskMessage = async (req, res) => {
     try {
         const user = await User.findOne({ _id: userId });
         if (!user) {
-            throw new Error("User not found");
+            throw new Error("ユーザーが見つかりません。");
         }
 
         let chat = await Chat.findOne({ userId: userId });
@@ -50,7 +50,7 @@ const sendAskMessage = async (req, res) => {
         // Save the chat (either a new one or the updated one)
         await chat.save();
 
-        res.json({ message: "Successfully sent" });
+        res.json({ message: "送信に成功しました。" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -66,9 +66,30 @@ const getUserMessage = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+const giveStartToVideo = async (req, res) => {
+    console.log("getUserMessage")
+    const userId = req.userId;
+    const { videoId } = req.body;
+    console.log(req.body)
+    try {
+        const video = await Video.findOne({_id:videoId});
+        const user = await User.findOne({_id : userId});
+        video.stars += 1;
+        user.likes.push(videoId);
+        await video.save();
+        await user.save();
+        res.json({
+            message:"You give the star!"
+        })
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 module.exports = {
     getUsers,
     sendAskMessage,
     getUserMessage,
+    giveStartToVideo,
 };

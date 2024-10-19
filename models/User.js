@@ -42,7 +42,18 @@ const userSchema = new mongoose.Schema({
       type: Date
     }
   },
-  uploads:{type:Number, default:0}
+  uploads:{type:Number, default:0},
+  searchField:{
+    type:String
+  }
 }, { timestamps: true });
+
+userSchema.pre('save', function (next) {
+  this.searchField = `${this.name} ${this.email} ${this.role}`;
+  next();
+});
+
+// Add indexes to frequently queried fields
+userSchema.index({ searchField: 'text' });
 
 module.exports = mongoose.model('User', userSchema);

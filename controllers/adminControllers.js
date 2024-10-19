@@ -42,10 +42,10 @@ const getAnalyseData = async (req, res) => {
         const paid = 4000000;
 
         res.json({
-            viewer:viewerNumber,
-            posters:postersNumber,
-            video:videoNumber,
-            paidCount:paid
+            viewer: viewerNumber,
+            posters: postersNumber,
+            video: videoNumber,
+            paidCount: paid
         })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -156,6 +156,33 @@ const deleteAllChats = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+const searchUsersInString = async (req, res) => {
+    const { inputValue, page, perPage } = req.body;
+    const skip = (page - 1) * perPage;
+    // const sort = 'createdAt';
+
+    try {
+        const query = {
+            searchField: new RegExp(inputValue, 'i'), // Precompiled regex for better performance
+        };
+        const projection = 'name email role videoUrl avatar posterCounts viewCounts expired';
+        const totalVideos = await User.countDocuments(query);
+        const users = await User.find(query)
+            .select(projection)       // Only select required fields
+            // .sort({ [sort]: -1 })     // Sort by the selected key
+            .skip(skip)               // Skip documents for pagination
+            .limit(perPage)           // Limit to `perPage`
+            .lean();                  // Use lean for better performance
+
+        // Send the response with videos and total pages for pagination
+        res.status(200).json({
+            users: users,                            // Array of video results
+            totalPages: Math.ceil(totalVideos / perPage),  // Total pages for pagination
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 
 module.exports = {
@@ -168,5 +195,6 @@ module.exports = {
     sendMessages,
     viewMessages,
     deleteAllChats,
-    getAnalyseData
+    getAnalyseData,
+    searchUsersInString
 }

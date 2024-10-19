@@ -228,8 +228,7 @@ const searchVideos = async (req, res) => {
 const searchVideoInString = async (req, res) => {
     console.log("searchVideoInString controller");
 
-    const { inputValue, currentPage = 1, selectedKeys } = req.body;
-    const perPage = 20;
+    const { inputValue, currentPage, perPage, selectedKeys } = req.body;
     const skip = (currentPage - 1) * perPage;
     const sort = selectedKeys?.currentKey || 'uploadDate';
 

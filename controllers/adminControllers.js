@@ -10,19 +10,20 @@ const createNews = async (req, res) => {
             content: content
         })
         await news.save()
-        res.json({ message: 'ニュースが正常に作成されました。' })
+        res.json({
+            message: 'ニュースが正常に作成されました。',
+        })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
 }
 
 const getNews = async (req, res) => {
-    const perPage = 10
+    const perPage = 4
     const page = req.body.currenPage
     const skip = (page - 1) * perPage
-
     try {
-        const news = await News.find().skip(skip).limit(perPage)
+        const news = await News.find().sort({ date: -1 }).skip(skip).limit(perPage)
         const totalPages = Math.ceil(await News.countDocuments() / perPage)
         res.json({
             news,
@@ -93,6 +94,7 @@ const sendMessages = async (req, res) => {
             from: "admin",
             content: content
         })
+        chat.new = true;
         await chat.save()
         res.json({
             message: "送信が完了しました！"

@@ -37,5 +37,6 @@ router.post('/isStaredVideo', authMiddleware, isStaredVideo);
 router.post('/getUserMessage', authMiddleware, userController.getUserMessage);
 router.post('/giveStartToVideo', authMiddleware, userController.giveStartToVideo);
 router.post('/searchVideoInString', authMiddleware, searchVideoInString);
+router.post('/readMessage', authMiddleware, userController.readMessage);
 
 module.exports = router;

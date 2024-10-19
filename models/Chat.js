@@ -15,7 +15,8 @@ const chatSchema = new mongoose.Schema({
         content: { type: String, required: true },
         date: { type: Date, default: Date.now }
     }],
-    unread: { type: Number, default: 0 }
+    unread: { type: Number, default: 0 },
+    new: { type: Boolean, defualt: false }
 });
 
 const Chat = mongoose.model('Chat', chatSchema);

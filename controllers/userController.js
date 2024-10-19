@@ -72,14 +72,30 @@ const giveStartToVideo = async (req, res) => {
     const { videoId } = req.body;
     console.log(req.body)
     try {
-        const video = await Video.findOne({_id:videoId});
-        const user = await User.findOne({_id : userId});
+        const video = await Video.findOne({ _id: videoId });
+        const user = await User.findOne({ _id: userId });
         video.stars += 1;
         user.likes.push(videoId);
         await video.save();
         await user.save();
         res.json({
-            message:"You give the star!"
+            message: "You give the star!"
+        })
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+const readMessage = async (req, res) => {
+    console.log("readMessage")
+    const userId = req.userId;
+    console.log(req.body)
+    try {
+        const chat = await Chat.findById({ userId: userId });
+        chat.new = false;
+        await chat.save()
+        res.json({
+            message: "Read Messsage!"
         })
 
     } catch (err) {
@@ -92,4 +108,5 @@ module.exports = {
     sendAskMessage,
     getUserMessage,
     giveStartToVideo,
+    readMessage
 };

@@ -1,9 +1,10 @@
 const Stripe = require('stripe');
+const User = require("../models/User");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const stripePayments = async (req, res) => {
-    console.log("payments intergration",process.env.STRIPE_SECRET_KEY)
-    // const userId = req.userId;
+    console.log("payments intergration", process.env.STRIPE_SECRET_KEY)
+    const userId = req.userId;
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -20,9 +21,19 @@ const stripePayments = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.CLIENT_URL}/payment/success`, // Your frontend success URL
-            cancel_url: `${process.env.CLIENT_URL}/payment/cancel`, // Your frontend cancel URL
+            success_url: `${process.env.CLIENT_URL}/account`,
+            cancel_url: `${process.env.CLIENT_URL}/account`,
         });
+        const user = await User.findById(userId);
+        user.role = "有料会員";
+
+        // Set the start time to either the previous expiration end or the current time (if no expiration exists)
+        user.expired.start = expired?.end ? expired.end : Date.now();
+
+        // Add 365 days (1 year) to either the existing expiration end or the current time if no previous expiration
+        user.expired.end = (expired?.end ? expired.end : Date.now()) + (365 * 24 * 60 * 60 * 1000);
+
+        user.save();
 
         res.json({ id: session.id });
     } catch (err) {

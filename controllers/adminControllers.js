@@ -33,6 +33,25 @@ const getNews = async (req, res) => {
         res.status(500).json({ message: err.message })
     }
 }
+
+const getAnalyseData = async (req, res) => {
+    try {
+        const viewerNumber = await User.countDocuments({ role: "有料会員" });
+        const postersNumber = await User.countDocuments({ posterCounts: { $gt: 0 } });
+        const videoNumber = await Video.countDocuments();
+        const paid = 4000000;
+
+        res.json({
+            viewer:viewerNumber,
+            posters:postersNumber,
+            video:videoNumber,
+            paidCount:paid
+        })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
 const getAllVideos = async (req, res) => {
     const { page, perPage, sort } = req.body;
     try {
@@ -148,5 +167,6 @@ module.exports = {
     getAllMessage,
     sendMessages,
     viewMessages,
-    deleteAllChats
+    deleteAllChats,
+    getAnalyseData
 }

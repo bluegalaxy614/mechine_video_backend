@@ -8,13 +8,15 @@ const {
     getAllMessage,
     sendMessages,
     viewMessages,
-    deleteAllChats
+    deleteAllChats,
+    getAnalyseData
 } = require('../controllers/adminControllers');
 const { deleteUserById, deleteVideoById } = require('../controllers/VideoController');
 const router = express.Router();
 
 router.post('/createNews', createNews);
 router.post('/getNews', getNews);
+router.post('/getAnalyseData', getAnalyseData);
 router.post('/getVideoWithUserId', getVideoWithUserId);
 router.post('/getAllVideos', getAllVideos);
 router.post('/updateVideo', updateVideo);

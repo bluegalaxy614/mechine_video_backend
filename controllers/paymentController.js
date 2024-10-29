@@ -1,4 +1,5 @@
 const Stripe = require('stripe');
+require('dotenv').config();
 const User = require("../models/User");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 

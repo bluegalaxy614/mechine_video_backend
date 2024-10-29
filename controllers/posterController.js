@@ -1,12 +1,13 @@
+require('dotenv').config();
 const User = require('../models/User');
 const S3 = require('aws-sdk/clients/s3');
 
 const uploadFileToS3 = async (fileBuffer, fileName, contentType) => {
     const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: fileName,
         Body: fileBuffer,
-        ACL: 'public-read',  // Public access for the file
+        // ACL: 'public-read',  // Public access for the file
         ContentType: contentType,
     };
     const command = new PutObjectCommand(params);

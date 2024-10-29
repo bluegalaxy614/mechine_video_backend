@@ -1,3 +1,4 @@
+require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -9,10 +10,10 @@ const User = require('../models/User');
 // Function to upload file to S3
 const uploadFileToS3 = async (fileBuffer, fileName, contentType) => {
     const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: fileName,
         Body: fileBuffer,
-        ACL: 'public-read',  // Public access for the file
+        // ACL: 'public-read',  // Public access for the file
         ContentType: contentType,
     };
 
@@ -23,7 +24,7 @@ const uploadFileToS3 = async (fileBuffer, fileName, contentType) => {
 
 const deleteFileFromS3 = async (key) => {
     const params = {
-        Bucket: process.env.AWS_BUCKET_NAME, // S3 bucket name
+        Bucket: process.env.AWS_S3_BUCKET_NAME, // S3 bucket name
         Key: key, // File name (or path) in the S3 bucket
     };
 
@@ -51,24 +52,23 @@ const uploadVideoAndScreenshot = async (req, res) => {
     try {
         const userName = await User.findOne({ _id: userId });
         // Process Video Upload
-        // const videoFile = req.files['video'][0];
-        // console.log(videoFile);
-        // const videoFileName = `videos/${uuidv4}${path.extname(videoFile.originalname)}`;
-        // const videoFileName = `videos/${uuidv4()}${path.extname(videoFile.originalname)}`;
-        // const videoS3Response = await uploadFileToS3(videoFile.buffer, videoFileName, videoFile.mimetype);
-        // console.log('Video uploaded to S3:', videoS3Response);
-        // const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${videoFileName}`;
+        const videoFile = req.files['video'][0];
+        console.log(videoFile);
+        const videoFileName = `videos/${uuidv4()}${path.extname(videoFile.originalname)}`;
+        const videoS3Response = await uploadFileToS3(videoFile.buffer, videoFileName, videoFile.mimetype);
+        console.log('Video uploaded to S3:', videoS3Response);
+        const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${videoFileName}`;
 
-        const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
-        const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+        // const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+        // const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 
 
-        // const thumbnailFile = req.files['thumbnail'][0];
-        // const thumbnailFileName = `thumbnails/${uuidv4()}_thumbnail.png`;
+        const thumbnailFile = req.files['thumbnail'][0];
+        const thumbnailFileName = `thumbnails/${uuidv4()}_thumbnail.png`;
 
-        // const thumbnailsS3Response = await uploadFileToS3(thumbnailFile.buffer, thumbnailFileName, thumbnailFile.mimetype);
-        // console.log('Thumbnail uploaded to S3:', thumbnailsS3Response);
-        // const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbnailFileName}`;
+        const thumbnailsS3Response = await uploadFileToS3(thumbnailFile.buffer, thumbnailFileName, thumbnailFile.mimetype);
+        console.log('Thumbnail uploaded to S3:', thumbnailsS3Response);
+        const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbnailFileName}`;
 
         // Save video and screenshot URLs to MongoDB
         const newVideo = new Video({

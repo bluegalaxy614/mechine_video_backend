@@ -28,8 +28,9 @@ router.post('/updateProfile',
         { name: 'avatar', maxCount: 1 },
     ]),
     posterControllers.updateProfile);
-router.post('/getVideos', authMiddleware, getVideos);
-router.post('/getPosterVideos', authMiddleware, getPosterVideos);
+// router.post('/getVideos', authMiddleware, getVideos);
+router.post('/getVideos', getVideos);
+router.post('/getPosterVideos', getPosterVideos);
 router.post('/search', authMiddleware, searchVideos);
 router.post('/getUsers', userController.getUsers);
 router.post('/sendAskMessage', authMiddleware, userController.sendAskMessage);

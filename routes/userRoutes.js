@@ -30,14 +30,16 @@ router.post('/updateProfile',
     posterControllers.updateProfile);
 // router.post('/getVideos', authMiddleware, getVideos);
 router.post('/getVideos', getVideos);
-router.post('/getPosterVideos', getPosterVideos);
+router.post('/getPosterVideos', authMiddleware, getPosterVideos);
 router.post('/search', authMiddleware, searchVideos);
 router.post('/getUsers', userController.getUsers);
 router.post('/sendAskMessage', authMiddleware, userController.sendAskMessage);
 router.post('/isStaredVideo', authMiddleware, isStaredVideo);
 router.post('/getUserMessage', authMiddleware, userController.getUserMessage);
-router.post('/giveStartToVideo', authMiddleware, userController.giveStartToVideo);
+router.post('/giveStarToVideo', authMiddleware, userController.giveStarToVideo);
+router.post('/sendTimer', authMiddleware, userController.sendTimer);
 router.post('/searchVideoInString', authMiddleware, searchVideoInString);
 router.post('/readMessage', authMiddleware, userController.readMessage);
+router.post('/getPaid', authMiddleware, userController.getPaid);
 
 module.exports = router;

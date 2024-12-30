@@ -1,6 +1,32 @@
 require('dotenv').config();
 const Chat = require('../models/Chat');
 const User = require('../models/User');
+const Video = require('../models/Video');
+
+const addDailyIncome = async (userId, date, amount) => {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+  
+      // Add or update the daily income entry
+      const existingIncome = user.dailyIncome.find(entry => entry.date.toISOString() === new Date(date).toISOString());
+      if (existingIncome) {
+        existingIncome.amount += amount; // Update income if date exists
+      } else {
+        user.dailyIncome.push({ date: new Date(date), amount }); // Add new income entry
+      }
+  
+      // Update the total income
+      user.totalIncome += amount;
+  
+      await user.save();
+      console.log('Daily income updated successfully');
+    } catch (err) {
+      console.error(err);
+    }
+};
 
 const getUsers = async (req, res) => {
     const { perPage, page, sort } = req.body;
@@ -15,7 +41,6 @@ const getUsers = async (req, res) => {
 };
 
 const sendAskMessage = async (req, res) => {
-    console.log("sendAskMessage")
     const userId = req.userId;
     const { content } = req.body;
     console.log(content)
@@ -58,7 +83,6 @@ const sendAskMessage = async (req, res) => {
 };
 
 const getUserMessage = async (req, res) => {
-    console.log("getUserMessage")
     const userId = req.userId;
     try {
         let chats = await Chat.findOne({ userId: userId });
@@ -67,36 +91,90 @@ const getUserMessage = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-const giveStartToVideo = async (req, res) => {
-    console.log("getUserMessage")
+const giveStarToVideo = async (req, res) => {
     const userId = req.userId;
     const { videoId } = req.body;
-    console.log(req.body)
     try {
-        const video = await Video.findOne({ _id: videoId });
-        const user = await User.findOne({ _id: userId });
+        const video = await Video.findOne({ _id: videoId }); // This will now work since Video is imported
+        const user = await User.findOne({ _id: userId });     // Ensure the User model is also imported
+
+        // Check if the video and user exist
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" });
+        }
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update the stars for the video and add the videoId to the user's liked videos
         video.stars += 1;
         user.likes.push(videoId);
+
+        // Save the updated video and user documents
         await video.save();
         await user.save();
-        res.json({
-            message: "You give the star!"
-        })
 
+        res.json({
+            message: "You gave the star!"
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: err.message });
     }
 };
+
 const readMessage = async (req, res) => {
-    console.log("readMessage")
     const userId = req.userId;
-    console.log(req.body)
     try {
         const chat = await Chat.findById({ userId: userId });
         chat.new = false;
         await chat.save()
         res.json({
             message: "Read Messsage!"
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const getPaid = async (req, res) => {
+    const userId = req.userId;
+    try {
+    const user = await User.findById({_id : userId});
+        user.requestAction = true;
+        await user.save();
+        res.json({
+            message: "Request sent!"
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+const sendTimer = async (req, res) => {
+    const userId = req.userId;
+    const {PlayedTime, videoId} = req.body;
+    try {
+        
+        const video = await Video.findById(videoId);
+        video.views += 1;
+        video.videoDuration += Number(PlayedTime).toFixed(2);
+        video.revenue += Number(PlayedTime * process.env.PRICEPERSECOND);
+        
+        await video.save();
+
+        const user = await User.findById(userId);
+        user.totalPlayedTime += Number(PlayedTime).toFixed(2);
+        user.totalIncome += Number(PlayedTime * process.env.PRICEPERSECOND);
+        await user.save();
+
+        const dailyIncome = Number(PlayedTime * process.env.PRICEPERSECOND).toFixed(2);
+        await addDailyIncome(userId, new Date(), parseFloat(dailyIncome));
+        
+        res.json({
+            message: "ok"
         })
 
     } catch (err) {
@@ -104,10 +182,13 @@ const readMessage = async (req, res) => {
     }
 };
 
+
 module.exports = {
     getUsers,
     sendAskMessage,
     getUserMessage,
-    giveStartToVideo,
-    readMessage
+    giveStarToVideo,
+    readMessage,
+    sendTimer,
+    getPaid
 };

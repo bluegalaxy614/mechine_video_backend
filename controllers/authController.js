@@ -30,6 +30,8 @@ exports.register = async (req, res) => {
         email: email,
         avatar: user.avatar,
         role: user.role,
+        paymentStatus: user.paymentStatus,
+        cardNumber:user.paymentInfo.cardNumber
       },
       unread: 0,
     }
@@ -54,6 +56,9 @@ exports.login = async (req, res) => {
     unread = chat?.new;
   }
 
+  user.status = true;
+  await user.save();
+
   const token = generateToken(user._id);
   res.status(200).json(
     {
@@ -63,7 +68,7 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        role: user.role
+        role: user.role,
       },
       unread: unread
     }
@@ -78,6 +83,8 @@ exports.forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: 'ユーザーが見つかりません。' });
     }
+
+    user.password = "";
     // const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     // user.verificationCode = verificationCode;
     await user.save();
@@ -86,5 +93,21 @@ exports.forgotPassword = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+exports.logOut = async (req, res) => {
+  const {email} = req.body;
+
+  try{
+    const user = await User.findOne({email});
+    if(!user){
+      return res.status(400).json({message: 'ユーザーが見つかりません。'})
+    }
+    user.status = false;
+    await user.save();
+    return res.status(200).json({message:"ok"});
+  }catch(err){
+    res.status(500).json({message : "Internal server error"})
   }
 }

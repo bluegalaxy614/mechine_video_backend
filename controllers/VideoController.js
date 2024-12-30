@@ -18,7 +18,6 @@ const uploadFileToS3 = async (fileBuffer, fileName, contentType) => {
     };
 
     const command = new PutObjectCommand(params);
-    console.log(command);
     return s3Client.send(command);
 };
 
@@ -32,7 +31,6 @@ const deleteFileFromS3 = async (key) => {
         // Create a DeleteObjectCommand and send it
         const command = new DeleteObjectCommand(params);
         const data = await s3Client.send(command);
-        console.log("File deleted successfully:", data);
     } catch (err) {
         console.error("Error deleting file:", err.message);
     }
@@ -47,27 +45,18 @@ const uploadVideoAndScreenshot = async (req, res) => {
 
     const userId = req.userId;
 
-    console.log(req.body);
-
     try {
         const userName = await User.findOne({ _id: userId });
         // Process Video Upload
         const videoFile = req.files['video'][0];
-        console.log(videoFile);
         const videoFileName = `videos/${uuidv4()}${path.extname(videoFile.originalname)}`;
         const videoS3Response = await uploadFileToS3(videoFile.buffer, videoFileName, videoFile.mimetype);
-        console.log('Video uploaded to S3:', videoS3Response);
         const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${videoFileName}`;
-
-        // const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
-        // const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
-
 
         const thumbnailFile = req.files['thumbnail'][0];
         const thumbnailFileName = `thumbnails/${uuidv4()}_thumbnail.png`;
 
         const thumbnailsS3Response = await uploadFileToS3(thumbnailFile.buffer, thumbnailFileName, thumbnailFile.mimetype);
-        console.log('Thumbnail uploaded to S3:', thumbnailsS3Response);
         const thumbnailsUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbnailFileName}`;
 
         // Save video and screenshot URLs to MongoDB
@@ -90,80 +79,127 @@ const uploadVideoAndScreenshot = async (req, res) => {
 
         await newVideo.save();
 
-        userName.uploads += 1;
+        userName.posterCounts += 1;
         await userName.save();
 
         res.status(200).json({ message: 'ビデオが正常にアップロードされました!', videoUrl, thumbnailsUrl });
     } catch (error) {
         console.error('Error uploading files:', error);
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+        res.status(500).json({ message: error});
     }
 };
 
 const getVideos = async (req, res) => {
-    console.log("getVideos controller")
     const { page, perPage, sort } = req.body;
-    try {
         const skip = (page - 1) * perPage;
+    try {
         const videos = await Video.find().sort({ [sort]: -1 }).skip(skip).limit(perPage);
         const totalVideos = await Video.countDocuments();
 
         res.status(200).json({
-            videos,
+            videos : videos,
             currentPage: page,
             totalPages: Math.ceil(totalVideos / perPage)
         });
     } catch {
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+        res.status(500).json({ message: error});
     }
 }
 const getPosterVideos = async (req, res) => {
-    console.log("getPosterVideos controller");
-    console.log(req.body);
-
-    const { page = 1, perPage = 10, sort = 'uploadDate' } = req.body;
+    const { page, perPage } = req.body;
     const userId = req.userId;
     const skip = (page - 1) * perPage;
 
     try {
-        // Run all queries concurrently to reduce execution time
-        const [videos, totalVideos, unPaidVideos, paidVideos] = await Promise.all([
-            // Fetch videos with pagination, sorting, and lean
-            Video.find({ posterId: userId })
-                .select('_id title videoDuration views revenue status')
-                .sort({ [sort]: -1 })
-                .skip(skip)
-                .limit(perPage)
-                .lean(),
+        // Fetch the videos of the user (posterId)
+        const posterVideos = await Video.find({ posterId: userId }).skip(skip).limit(perPage);
 
-            // Get total count of videos uploaded by the user
-            Video.countDocuments({ posterId: userId }),
+        // Get the total number of videos posted by the user
+        const totalVideos = await Video.countDocuments({ posterId: userId });
 
-            // Count unpaid videos
-            Video.countDocuments({ posterId: userId, status: "未払い" }),
+        // Get the user details
+        const user = await User.findById(userId);
 
-            // Count paid videos
-            Video.countDocuments({ posterId: userId, status: "支払い" })
-        ]);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-        // Calculate total paid amounts
-        const totalPaidMounts = paidVideos * 1000 / 10000;
-
+        // Total income of the user
+        const totalPaidAmount = user.totalIncome || 0;
+        
+        // Paid and unpaid video logic
+        const paidVideos = user.paid || 0;  // Assuming user.paid is the number of paid videos
+        const unPaidVideos = totalPaidAmount - paidVideos;
         // Respond with the data
         res.status(200).json({
-            videos: videos,  // The list of videos
+            videos: posterVideos,  // The list of videos
             currentPage: page,
             totalPages: Math.ceil(totalVideos / perPage),  // Calculate total pages for pagination
             unPaidVideos: unPaidVideos,  // Unpaid videos count
-            paidVideos: paidVideos,    // Paid videos count
-            totalPaidMounts: totalPaidMounts // Total paid amount in the specified unit
+            paidVideos: totalVideos,  // Paid videos count
+            totalPaidAmount: totalPaidAmount  // Total paid amount in the specified unit
         });
-
     } catch (error) {
         console.error("Error in getPosterVideos:", error);
         res.status(500).json({ message: 'An error occurred while fetching the videos.' });
     }
 };
+
+const getPosterVideosById = async (req, res) => {
+    const { userId, date, page, perPage } = req.body;
+    const skip = (page - 1) * perPage;
+    const pickerDate = date ? date : new Date();
+    const user_Id = new mongoose.Types.ObjectId(userId);
+
+    try {
+        // Fetch the videos of the user (posterId)
+        const posterVideos = await Video.find({ posterId: user_Id }).skip(skip).limit(perPage);
+
+        // Get the total number of videos posted by the user
+        const totalVideos = await Video.countDocuments({ posterId: user_Id });
+
+        // Get the user details
+        const user = await User.findById(user_Id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Total income of the user
+        const totalPaidAmount = user.totalIncome;
+        
+        // Paid and unpaid video logic
+        const paidVideos = user.paid;  // Assuming user.paid is the number of paid videos
+        const unPaidVideos = totalPaidAmount - paidVideos;
+        const poster = await User.findById({userId});
+        const posterImage = poster.avatar;
+        const posterName = poster.name;
+
+        const targetMonth = `${pickerDate.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        // Find the income entry for the target month
+        const incomeEntry = user.monthlyIncome.find(entry => entry.month === targetMonth);
+
+        // If no entry is found, return 0 income for the current month
+        const income = incomeEntry ? incomeEntry.income : 0;
+        // Respond with the data
+        res.status(200).json({
+            videos: posterVideos,  // The list of videos
+            currentPage: page,
+            totalPages: Math.ceil(totalVideos / perPage),  // Calculate total pages for pagination
+            unPaidVideos: unPaidVideos,  // Unpaid videos count
+            paidVideos: totalVideos,  // Paid videos count
+            totalPaidAmount: totalPaidAmount,
+            posterName : posterName,
+            posterImage : posterImage,
+            income : income,
+            targetMonth : targetMonth
+        });
+    } catch (error) {
+        console.error("Error in getPosterVideos:", error);
+        res.status(500).json({ message: error });
+    }
+};
+
 
 const isStaredVideo = async (req, res) => {
     console.log("getPosterVideos controller")
@@ -175,7 +211,7 @@ const isStaredVideo = async (req, res) => {
         await user.save();
         res.json({ message: "成功！" })
     } catch {
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+        res.status(500).json({ message: error});
     }
 }
 
@@ -259,14 +295,13 @@ const searchVideoInString = async (req, res) => {
         });
     } catch (error) {
         console.error("Error in searchVideoInString:", error);
-        res.status(500).json({ message: 'An error occurred during the search process.' });
+        res.status(500).json({ message: error });
     }
 };
 
 
 
 const deleteUserById = async (req, res) => {
-    console.log("deleteUserById")
     const { userId } = req.body;
     try {
         const video = await Video.find({ userId: userId });
@@ -280,11 +315,24 @@ const deleteUserById = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+        res.status(500).json({ message: error});
+    }
+}
+const cancelUserById = async (req, res) => {
+    const { userId } = req.body;
+    try {
+        const user = await User.findById({ userId });
+        user.paymentStatus=false;
+        await user.save();
+        res.json({
+            message: "成功！"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error});
     }
 }
 const deleteVideoById = async (req, res) => {
-    console.log("deleteVideoById")
     const { videoId } = req.body;
     try {
         const video = await Video.findById(videoId);
@@ -298,7 +346,22 @@ const deleteVideoById = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.status(500).json({ message: 'An error occurred during the upload process.' });
+        res.status(500).json({ message: error});
+    }
+}
+
+const discardVideoById = async (req, res) => {
+    const { videoId } = req.body;
+    try {
+        const video = await Video.findById(videoId);
+        video.status = '未払い';
+        await video.save();
+        res.json({
+            message: "成功！"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error});
     }
 }
 module.exports = {
@@ -309,5 +372,8 @@ module.exports = {
     isStaredVideo,
     deleteUserById,
     deleteVideoById,
-    searchVideoInString
+    searchVideoInString,
+    discardVideoById,
+    cancelUserById,
+    getPosterVideosById
 };

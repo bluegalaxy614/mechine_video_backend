@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const videoSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String },
-    videoDuration: { type: String },
+    videoDuration: { type: Number, default : 0 },
     videoCode: { type: String },
     machineName: { type: String },
     format: { type: String },
@@ -17,7 +17,7 @@ const videoSchema = new mongoose.Schema({
     posterName: { type: String, required: true },
     uploadDate: { type: Date, default: Date.now },
     views: { type: Number, default: 0 },
-    status: { type: String, default: '保留中' },
+    status: { type: String, default: '支払い' }, //保留中
     revenue: { type: Number, default: 0 },
     stars: { type: Number, default: 0 },
     searchField: { type: String },

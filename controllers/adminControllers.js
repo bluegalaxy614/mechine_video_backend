@@ -2,6 +2,7 @@ const News = require('../models/News')
 const Video = require('../models/Video')
 const Chat = require('../models/Chat')
 const User = require('../models/User')
+
 const createNews = async (req, res) => {
     const { title, content } = req.body
     try {
@@ -39,7 +40,7 @@ const getAnalyseData = async (req, res) => {
         const viewerNumber = await User.countDocuments({ role: "有料会員" });
         const postersNumber = await User.countDocuments({ posterCounts: { $gt: 0 } });
         const videoNumber = await Video.countDocuments();
-        const paid = 4000000;
+        const paid = 80000 * viewerNumber;
 
         res.json({
             viewer: viewerNumber,
@@ -196,5 +197,5 @@ module.exports = {
     viewMessages,
     deleteAllChats,
     getAnalyseData,
-    searchUsersInString
+    searchUsersInString,
 }
